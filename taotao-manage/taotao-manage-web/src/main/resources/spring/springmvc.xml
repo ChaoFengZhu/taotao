@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+">
+    <!--扫描controller注解,spring和springmvc是父子容器关系-->
+    <context:component-scan base-package="com.taotao.controller"/>
+
+    <!--对前端控制器拦截的静态资源进行释放-->
+    <mvc:default-servlet-handler/>
+
+    <!--视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+    <!-- 资源映射 -->
+    <mvc:resources location="/WEB-INF/css/" mapping="/css/**"/>
+    <mvc:resources location="/WEB-INF/js/" mapping="/js/**"/>
+
+    <!--解决中文响应乱码问题,springmvc帮我们转的json不乱码,我们自己返回的中文乱码-->
+    <mvc:annotation-driven >
+        <mvc:message-converters register-defaults="true">
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <!-- json 数据乱码 -->
+                        <value>text/html;charset=UTF-8</value>
+                        <!-- json 数据乱码-->
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+            </bean>
+            <!-- 配置Fastjson支持 -->
+            <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json</value>
+                        <value>text/html;charset=UTF-8</value>
+                    </list>
+                </property>
+                <!--                <property name="features">
+                                    <list>
+                                        <value>WriteMapNullValue</value>
+                                        <value>QuoteFieldNames</value>
+                                    </list>
+                                </property>-->
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!--配置注解驱动启动 mvc自动转将响应的对象转成json-->
+    <mvc:annotation-driven/>
+    <!--配置文件上传解析器-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="UTF-8"/>
+        <!-- 设定文件上传的最大值5MB，5*1024*1024 -->
+        <property name="maxUploadSize" value="5242880"></property>
+    </bean>
+
+    <!--配置权限拦截器-->
+    <!--<mvc:interceptors>
+    <mvc:interceptor>
+        &lt;!&ndash;拦截所有请求&ndash;&gt;
+        <mvc:mapping path="/**"/>
+        &lt;!&ndash;释放静态资源和登录请求&ndash;&gt;
+        <mvc:exclude-mapping path="/user/login"/>
+        <mvc:exclude-mapping path="/css/**"/>
+        <mvc:exclude-mapping path="/img/**"/>
+        <mvc:exclude-mapping path="/plugins/**"/>
+        <bean class="it.cast.web.Myincepter.MyInterceptor"/>
+    </mvc:interceptor>
+</mvc:interceptors>-->
+</beans>
